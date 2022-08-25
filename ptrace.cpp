@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include <sys/ptrace.h>
+#include <libr/r_io.h>
 #include <errno.h>
 
 #include <string.h>
@@ -79,7 +80,7 @@ static void real_handle_cont( pid_t pid, pid_state *state )
 {
     pid_t child=(pid_t)state->context_state[1];
     pid_state *child_state=lookup_state( child );
-    __ptrace_request req=(__ptrace_request)state->context_state[0];
+    r_ptrace_request_t req=(r_ptrace_request_t)state->context_state[0];
     if( req==PTRACE_CONT ) {
         child_state->trace_mode|=TRACE_CONT;
         dlog("ptrace: %d PTRACE_CONT(" PID_F ")\n", pid, child );
@@ -183,7 +184,7 @@ static void handle_peek_data( pid_t pid, pid_state *state )
 
     if( verify_permission( pid, state ) ) {
         errno=0;
-        long data=ptrace( (__ptrace_request)state->context_state[0], child, state->context_state[2], 0 );
+        long data=ptrace( (r_ptrace_request_t)state->context_state[0], child, state->context_state[2], 0 );
         if( data!=-1 || errno==0 ) {
             dlog("handle_peek_data: %d is peeking data from " PID_F " at address %p\n", pid, child, (void*)state->context_state[2] );
 
@@ -208,7 +209,7 @@ static void handle_poke_data( pid_t pid, pid_state *state )
     pid_t child=(pid_t)state->context_state[1];
 
     if( verify_permission( pid, state ) &&
-        ptrace( (__ptrace_request)state->context_state[0], child, state->context_state[2], state->context_state[3] )==0 )
+        ptrace( (r_ptrace_request_t)state->context_state[0], child, state->context_state[2], state->context_state[3] )==0 )
     {
         dlog("handle_poke_data: %d is pokeing data in " PID_F " at address %p\n", pid, child, (void*)state->context_state[2] );
         ptlib_set_retval( pid, 0 );

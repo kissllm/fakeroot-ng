@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+autoreconf -vif
+export CFLAGS="$CFLAGS -isystem /usr/include/libr"
+export CXXFLAGS="$CXXFLAGS -isystem /usr/include/libr"
+
+./configure \
+    --prefix=/usr
+
+make
+doas make install
